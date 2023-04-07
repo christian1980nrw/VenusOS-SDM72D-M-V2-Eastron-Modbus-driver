@@ -19,4 +19,6 @@ Add in file /opt/victronenergy/dbus-modbus-client/dbus-modbus-client.py below th
 
 for Eastron meters SDM72D the expression: import TWE_Eastron_SDM72D
 
+Next delete everything in folder /opt/victronenergy/dbus-modbus-client/__pycache__ and reboot.
+
 See installation notes at https://community.victronenergy.com/idea/114716/power-meter-lib-for-modbus-rtu-based-meters-from-a.html
