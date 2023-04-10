@@ -91,7 +91,7 @@ class Eastron_SDM72Dv2(device.EnergyMeter):
 
         self.data_regs = regs
 
-        # Re-calculate net energy value out of forward and reverse data, meter-data is too inaccurate.
+        # Re-calculate net energy value out of forward and reverse data, meter-data is too inaccurate to be accepted as valid by VRM portal.
         forward_energy = self.read_register(forward_energy_reg)
         reverse_energy = self.read_register(reverse_energy_reg)
         net_energy = forward_energy - reverse_energy
