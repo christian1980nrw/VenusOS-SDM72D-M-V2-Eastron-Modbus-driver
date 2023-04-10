@@ -2,7 +2,7 @@
 # might work also with other Eastron devices > Product code on 0xfc02 (type u16b) to be added into models overview
 # 
 # Community contribution by Thomas Weichenberger
-# Version 1.4 - 2022-02-13 - Victron VRM Portal fixed 2023-04-03 by chistian1980nrw
+# Version 1.4 - 2022-02-13 - Victron VRM Portal statistics tested with Venus OS v3.00~32
 #
 # Thanks to Victron for their open platform and especially for the support of Matthijs Vader
 # For any usage a donation to seashepherd.org with an amount of 5 USD/EUR/GBP or equivalent is expected
@@ -73,17 +73,14 @@ class Eastron_SDM72Dv2(device.EnergyMeter):
 		
         regs = [
             Reg_f32b(0x0034, '/Ac/Power',          1, '%.1f W'),
-            Reg_f32b(0x0030, '/Ac/Current',         1, '%.1f A'),   
+            Reg_f32b(0x0030, '/Ac/Current',        1, '%.1f A'),   
             Reg_f32b(0x0046, '/Ac/Frequency',      1, '%.1f Hz'),
-            Reg_f32b(0x018C, '/Ac/Energy/Forward', 1, '%.1f kWh'),
-            Reg_f32b(0x018C, '/Ac/L1/Energy/Forward', 1, '%.1f kWh'),
-            Reg_f32b(0x018C, '/Ac/Energy/Net',      1, '%.1f kWh'),            
+            Reg_f32b(0x004a, '/Ac/Energy/Reverse', 1, '%.1f kWh'),
+            Reg_f32b(0x0048, '/Ac/Energy/Forward', -1, '%.1f kWh'),
+            Reg_f32b(0x018C, '/Ac/Energy/Net',     1, '%.1f kWh'),
+            Reg_f32b(0x0156, '/Ac/Energy/Total',   1, '%.1f kWh'), 
         ]
-	
- # This meter (SDM72 V2) has no separate total-kWh register for L1, L2, L3 / we will use L1 only.
- # 0x018C contains import and export, so no need for /Ac/Energy/Reverse and /Ac/L1/Energy/Reverse.
- # see https://github.com/reaper7/SDM_Energy_Meter/blob/master/SDM.h#L202
- # VRM Portal statistics are OK with this.
+ # Register list see https://github.com/reaper7/SDM_Energy_Meter/blob/master/SDM.h#L104
 
         for n in range(1, phases + 1):
             regs += self.phase_regs(n)
