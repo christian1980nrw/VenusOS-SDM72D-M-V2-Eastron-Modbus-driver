@@ -71,7 +71,7 @@ class Eastron_SDM72Dv2(device.EnergyMeter):
 
         phases = nr_phases[int(self.info['/PhaseConfig'])]
 		
-        net_energy_reg = Reg_f32b(0x018C, '/Ac/Energy/Net', 1, '%.1f kWh') # import minus export
+        net_energy_reg = Reg_f32b(0x018C, '/Ac/Energy/Net', 1, '%.1f kWh') # export minus import
         forward_energy_reg = Reg_f32b(0x0048, '/Ac/Energy/Forward', 1, '%.1f kWh') # import
         reverse_energy_reg = Reg_f32b(0x004a, '/Ac/Energy/Reverse', 1, '%.1f kWh') # export
 
