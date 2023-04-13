@@ -81,7 +81,7 @@ class Eastron_SDM72Dv2(device.EnergyMeter):
             Reg_f32b(0x0046, '/Ac/Frequency',      1, '%.1f Hz'),
             Reg_f32b(0x0048, '/Ac/Energy/Forward', -1, '%.1f kWh'),
             Reg_f32b(0x004a, '/Ac/Energy/Reverse', 1, '%.1f kWh'), 
-# te        Reg_f32b(0x0048, '/Ac/L1/Energy/Forward', -1, '%.1f kWh'), # We dont have separate data for L2 and L3 at this meter
+# test      Reg_f32b(0x0048, '/Ac/L1/Energy/Forward', -1, '%.1f kWh'), # We dont have separate data for L2 and L3 at this meter
 # test      Reg_f32b(0x004a, '/Ac/L1/Energy/Reverse', 1, '%.1f kWh'), # so we will use L1 only for VRM Portal statistics
             Reg_f32b(0x0156, '/Ac/Energy/Total',   1, '%.1f kWh'),            
             net_energy_reg,
