@@ -45,7 +45,7 @@ class Eastron_SDM72Dv2(device.EnergyMeter):
     productid = 0xb023 # Eastron id assigned by Victron Support
     #productid = 45058 # EM24 ID
     productname = 'Eastron SDM72Dv2'
-    min_timeout = 0.1
+    min_timeout = 0.5
 
     def __init__(self, *args):
         super(Eastron_SDM72Dv2, self).__init__(*args)
@@ -71,20 +71,19 @@ class Eastron_SDM72Dv2(device.EnergyMeter):
 
         phases = nr_phases[int(self.info['/PhaseConfig'])]
 		
-        net_energy_reg = Reg_f32b(0x018C, '/Ac/Energy/Net', -1, '%.1f kWh') # export minus import
-        forward_energy_reg = Reg_f32b(0x0048, '/Ac/Energy/Forward', -1, '%.1f kWh') # import
-        reverse_energy_reg = Reg_f32b(0x004a, '/Ac/Energy/Reverse', 1, '%.1f kWh') # export
+  #      net_energy_reg = Reg_f32b(0x018C, '/Ac/Energy/Net', 1, '%.1f kWh') # export minus import
+ #       forward_energy_reg = Reg_f32b(0x0048, '/Ac/Energy/Forward', 1, '%.1f kWh') # import
+ #       reverse_energy_reg = Reg_f32b(0x004a, '/Ac/Energy/Reverse', 1, '%.1f kWh') # export
 
         regs = [
             Reg_f32b(0x0034, '/Ac/Power',          1, '%.1f W'),
             Reg_f32b(0x0030, '/Ac/Current',        1, '%.1f A'),   
             Reg_f32b(0x0046, '/Ac/Frequency',      1, '%.1f Hz'),
-            Reg_f32b(0x0048, '/Ac/Energy/Forward', -1, '%.1f kWh'),
+            Reg_f32b(0x0048, '/Ac/Energy/Forward', 1, '%.1f kWh'),
             Reg_f32b(0x004a, '/Ac/Energy/Reverse', 1, '%.1f kWh'), 
-# test      Reg_f32b(0x0048, '/Ac/L1/Energy/Forward', -1, '%.1f kWh'), # We dont have separate data for L2 and L3 at this meter
-# test      Reg_f32b(0x004a, '/Ac/L1/Energy/Reverse', 1, '%.1f kWh'), # so we will use L1 only for VRM Portal statistics
-            Reg_f32b(0x0156, '/Ac/Energy/Total',   1, '%.1f kWh'),            
-            net_energy_reg,
+            Reg_f32b(0x0048, '/Ac/L1/Energy/Forward', 1, '%.1f kWh'), # We dont have separate data for L2 and L3 at this meter
+            Reg_f32b(0x004a, '/Ac/L1/Energy/Reverse', 1, '%.1f kWh'), # so we will use L1 only for VRM Portal statistics          
+#            net_energy_reg,
         ]
 # Register list for the SDM72 V2 see https://github.com/reaper7/SDM_Energy_Meter/blob/master/SDM.h#L104
 
@@ -94,10 +93,10 @@ class Eastron_SDM72Dv2(device.EnergyMeter):
         self.data_regs = regs
 
         # Re-calculate net energy value out of forward and reverse data, meter-data is too inaccurate for the VRM portal.
-        forward_energy = self.read_register(forward_energy_reg)
-        reverse_energy = self.read_register(reverse_energy_reg)
-        net_energy = forward_energy + reverse_energy
-        self.write_register(net_energy_reg, net_energy)
+  #      forward_energy = self.read_register(forward_energy_reg)
+  #      reverse_energy = self.read_register(reverse_energy_reg)
+  #      net_energy = reverse_energy - forward_energy
+  #      self.write_register(net_energy_reg, net_energy)
 
     def get_ident(self):
         return 'cg_%s' % self.info['/Serial']
