@@ -2,7 +2,7 @@
 # might work also with other Eastron devices > Product code on 0xfc02 (type u16b) to be added into models overview
 # 
 # Community contribution by Thomas Weichenberger
-# Version 1.4 - 2022-02-13 - Victron VRM Portal statistics fixed by christian1980nrw 2023-04-11
+# Version 1.4 - 2022-02-13 - Victron VRM Portal statistics fixed by christian1980nrw 2023-04-18
 #
 # Thanks to Victron for their open platform and especially for the support of Matthijs Vader
 # For any usage a donation to seashepherd.org with an amount of 5 USD/EUR/GBP or equivalent is expected
@@ -70,33 +70,31 @@ class Eastron_SDM72Dv2(device.EnergyMeter):
         self.read_info()
 
         phases = nr_phases[int(self.info['/PhaseConfig'])]
-		
-  #      net_energy_reg = Reg_f32b(0x018C, '/Ac/Energy/Net', 1, '%.1f kWh') # export minus import
- #       forward_energy_reg = Reg_f32b(0x0048, '/Ac/Energy/Forward', 1, '%.1f kWh') # import
- #       reverse_energy_reg = Reg_f32b(0x004a, '/Ac/Energy/Reverse', 1, '%.1f kWh') # export
+
+# Register list for the SDM72 V2 see https://github.com/reaper7/SDM_Energy_Meter/blob/master/SDM.h#L104
 
         regs = [
             Reg_f32b(0x0034, '/Ac/Power',          1, '%.1f W'),
             Reg_f32b(0x0030, '/Ac/Current',        1, '%.1f A'),   
             Reg_f32b(0x0046, '/Ac/Frequency',      1, '%.1f Hz'),
-            Reg_f32b(0x0048, '/Ac/Energy/Forward', 1, '%.1f kWh'),
-            Reg_f32b(0x004a, '/Ac/Energy/Reverse', 1, '%.1f kWh'), 
-            Reg_f32b(0x0048, '/Ac/L1/Energy/Forward', 1, '%.1f kWh'), # We dont have separate data for L2 and L3 at this meter
-            Reg_f32b(0x004a, '/Ac/L1/Energy/Reverse', 1, '%.1f kWh'), # so we will use L1 only for VRM Portal statistics          
-#            net_energy_reg,
+            
+# Option 1: Include phase balancing energy (additional grid import and export at the VRM portal statistics)           
+#            Reg_f32b(0x0048, '/Ac/Energy/Forward', 1, '%.1f kWh'),
+#            Reg_f32b(0x004a, '/Ac/Energy/Reverse', 1, '%.1f kWh'), 
+#            Reg_f32b(0x0048, '/Ac/L1/Energy/Forward', 1, '%.1f kWh'),  # We dont have separate data for L2 and L3 at this meter
+#            Reg_f32b(0x004a, '/Ac/L1/Energy/Reverse', 1, '%.1f kWh'),  # so we will use L1 only for VRM Portal statistics
+
+# Option 2: Dont show phase balancing energy at VRM portal statistics (statistics may be minimally inaccurate with this option)           
+             Reg_f32b(0x018C, '/Ac/Energy/Forward', 1, '%.1f kWh'),     # export minus import
+             Reg_f32b(0x018C, '/Ac/Energy/Reverse', -1, '%.1f kWh'),    # export minus import (negative)
+             Reg_f32b(0x018C, '/Ac/L1/Energy/Forward', 1, '%.1f kWh'),  # export minus import
+             Reg_f32b(0x018C, '/Ac/L1/Energy/Reverse', -1, '%.1f kWh'), # export minus import (negative)
         ]
-# Register list for the SDM72 V2 see https://github.com/reaper7/SDM_Energy_Meter/blob/master/SDM.h#L104
 
         for n in range(1, phases + 1):
             regs += self.phase_regs(n)
 
         self.data_regs = regs
-
-        # Re-calculate net energy value out of forward and reverse data, meter-data is too inaccurate for the VRM portal.
-  #      forward_energy = self.read_register(forward_energy_reg)
-  #      reverse_energy = self.read_register(reverse_energy_reg)
-  #      net_energy = reverse_energy - forward_energy
-  #      self.write_register(net_energy_reg, net_energy)
 
     def get_ident(self):
         return 'cg_%s' % self.info['/Serial']
