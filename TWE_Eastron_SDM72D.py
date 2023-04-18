@@ -78,7 +78,7 @@ class Eastron_SDM72Dv2(device.EnergyMeter):
             Reg_f32b(0x0030, '/Ac/Current',        1, '%.1f A'),   
             Reg_f32b(0x0046, '/Ac/Frequency',      1, '%.1f Hz'),
             
-# Option 1: Include phase balancing energy (additional grid import and export at the VRM portal statistics)           
+# Option 1: Include phase balancing energy (additional grid import and export at the VRM portal statistics especially at 1 phase systems)           
 #            Reg_f32b(0x0048, '/Ac/Energy/Forward', 1, '%.1f kWh'),
 #            Reg_f32b(0x004a, '/Ac/Energy/Reverse', 1, '%.1f kWh'), 
 #            Reg_f32b(0x0048, '/Ac/L1/Energy/Forward', 1, '%.1f kWh'),  # We dont have separate data for L2 and L3 at this meter
