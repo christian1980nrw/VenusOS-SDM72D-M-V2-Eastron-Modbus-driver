@@ -375,7 +375,7 @@ class ModbusDevice(object):
 
         with self.dbus as d:
             for r in self.data_regs:
-                t = self.read_data_regs(r, d)
+                t = self.read_input_data_regs(r, d)
                 if t:
                     latency.append(t)
 
