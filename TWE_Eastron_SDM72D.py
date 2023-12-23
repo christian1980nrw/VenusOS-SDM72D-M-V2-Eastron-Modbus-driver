@@ -3,6 +3,7 @@
 # 
 # Community contribution by Thomas Weichenberger
 # Version 1.4 - 2022-02-13 - Victron VRM Portal statistics fixed by christian1980nrw 2023-04-18
+# Updated version 2023-08-21 by Daniel Genrich: Add dbus-modbus-client v1.34 support (Firmware 3.10~27 Beta)
 # Updated version 2023-12-24 by Daniel Genrich: Add dbus-modbus-client v1.47 support (Firmware 3.20~35 Beta)
 #
 # Thanks to Victron for their open platform and especially for the support of Matthijs Vader
@@ -21,9 +22,9 @@
 import logging
 import TWE_Eastron_device as device
 import probe
-import time
-
 from register import *
+
+import time
 
 log = logging.getLogger()
 
@@ -72,18 +73,16 @@ class Eastron_SDM72Dv2(device.CustomName, device.EnergyMeter):
             Reg_f32b(0x0034, '/Ac/Power',          1, '%.1f W'),
             Reg_f32b(0x0030, '/Ac/Current',        1, '%.1f A'),   
             Reg_f32b(0x0046, '/Ac/Frequency',      1, '%.1f Hz'),
-            
-# Option 1: Include phase balancing energy (additional grid import and export at the VRM portal statistics especially at 1 phase systems)           
-#            Reg_f32b(0x0048, '/Ac/Energy/Forward', 1, '%.1f kWh'),
-#            Reg_f32b(0x004a, '/Ac/Energy/Reverse', 1, '%.1f kWh'), 
-#            Reg_f32b(0x0048, '/Ac/L1/Energy/Forward', 1, '%.1f kWh'),  # We dont have separate data for L2 and L3 at this meter
-#            Reg_f32b(0x004a, '/Ac/L1/Energy/Reverse', 1, '%.1f kWh'),  # so we will use L1 only for VRM Portal statistics
-
-# Option 2: Dont show phase balancing energy at VRM portal statistics (statistics may be minimally inaccurate with this option)           
-             Reg_f32b(0x018C, '/Ac/Energy/Forward', 1, '%.1f kWh'),     # export minus import
-             Reg_f32b(0x018C, '/Ac/Energy/Reverse', -1, '%.1f kWh'),    # export minus import (negative)
-             Reg_f32b(0x018C, '/Ac/L1/Energy/Forward', 1, '%.1f kWh'),  # export minus import
-             Reg_f32b(0x018C, '/Ac/L1/Energy/Reverse', -1, '%.1f kWh'), # export minus import (negative)
+	
+# Hoymiles 3P always has the same energy on all three phases. So lets export that          
+            Reg_f32b(0x018C, '/Ac/Energy/Forward', 1, '%.1f kWh'),     # export minus import
+            Reg_f32b(0x018C, '/Ac/Energy/Reverse', -1, '%.1f kWh'),    # export minus import (negative)
+            Reg_f32b(0x018C, '/Ac/L1/Energy/Forward', 3, '%.1f kWh'),  # export minus import
+            Reg_f32b(0x018C, '/Ac/L1/Energy/Reverse', -3, '%.1f kWh'), # export minus import (negative)
+            Reg_f32b(0x018C, '/Ac/L2/Energy/Forward', 3, '%.1f kWh'),  # export minus import
+            Reg_f32b(0x018C, '/Ac/L2/Energy/Reverse', -3, '%.1f kWh'), # export minus import (negative)
+            Reg_f32b(0x018C, '/Ac/L3/Energy/Forward', 3, '%.1f kWh'),  # export minus import
+            Reg_f32b(0x018C, '/Ac/L3/Energy/Reverse', -3, '%.1f kWh'), # export minus import (negative)
         ]
 
         for n in range(1, phases + 1):
