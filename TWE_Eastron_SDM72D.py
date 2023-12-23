@@ -3,6 +3,7 @@
 # 
 # Community contribution by Thomas Weichenberger
 # Version 1.4 - 2022-02-13 - Victron VRM Portal statistics fixed by christian1980nrw 2023-04-18
+# Updated version 2023-12-24 by Daniel Genrich: Add dbus-modbus-client v1.47 support (Firmware 3.20~35 Beta)
 #
 # Thanks to Victron for their open platform and especially for the support of Matthijs Vader
 # For any usage a donation to seashepherd.org with an amount of 5 USD/EUR/GBP or equivalent is expected
