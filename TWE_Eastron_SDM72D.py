@@ -3,7 +3,6 @@
 # 
 # Community contribution by Thomas Weichenberger
 # Version 1.4 - 2022-02-13 - Victron VRM Portal statistics fixed by christian1980nrw 2023-04-18
-# Updated version 2023-08-21 by Daniel Genrich: Add dbus-modbus-client v1.34 support (Firmware 3.10~27 Beta)
 #
 # Thanks to Victron for their open platform and especially for the support of Matthijs Vader
 # For any usage a donation to seashepherd.org with an amount of 5 USD/EUR/GBP or equivalent is expected
@@ -21,9 +20,9 @@
 import logging
 import TWE_Eastron_device as device
 import probe
-from register import *
-
 import time
+
+from register import *
 
 log = logging.getLogger()
 
@@ -44,13 +43,18 @@ phase_configs = [
 
 class Eastron_SDM72Dv2(device.CustomName, device.EnergyMeter):
     productid = 0xb023 # Eastron id assigned by Victron Support
-    #productid = 45058 # EM24 ID
     productname = 'Eastron SDM72Dv2'
     min_timeout = 0.5
 
-    def __init__(self, *args):
-        super(Eastron_SDM72Dv2, self).__init__(*args)
+    def phase_regs(self, n):
+        s = 0x0002 * (n - 1)
+        return [
+            Reg_f32b(0x0000 + s, '/Ac/L%d/Voltage' % n,        1, '%.1f V'),
+            Reg_f32b(0x0006 + s, '/Ac/L%d/Current' % n,        1, '%.1f A'),
+            Reg_f32b(0x000c + s, '/Ac/L%d/Power' % n,          1, '%.1f W'),  
+        ]
 
+    def device_init(self):
         self.info_regs = [
             Reg_u16(0xfc02, '/HardwareVersion'),
             Reg_u16(0xfc03, '/FirmwareVersion'),
@@ -58,16 +62,6 @@ class Eastron_SDM72Dv2(device.CustomName, device.EnergyMeter):
             Reg_u32b(0x0014, '/Serial'),
         ]
 
-    def phase_regs(self, n):
-        s = 0x0002 * (n - 1)
-        regs = [
-            Reg_f32b(0x0000 + s, '/Ac/L%d/Voltage' % n,        1, '%.1f V'),
-            Reg_f32b(0x0006 + s, '/Ac/L%d/Current' % n,        1, '%.1f A'),
-            Reg_f32b(0x000c + s, '/Ac/L%d/Power' % n,          1, '%.1f W'),  
-        ]
-        return regs
-
-    def device_init(self):
         self.read_info()
 
         phases = nr_phases[int(self.info['/PhaseConfig'])]
@@ -79,22 +73,23 @@ class Eastron_SDM72Dv2(device.CustomName, device.EnergyMeter):
             Reg_f32b(0x0030, '/Ac/Current',        1, '%.1f A'),   
             Reg_f32b(0x0046, '/Ac/Frequency',      1, '%.1f Hz'),
             
-# Hoymiles 3P always has the same energy on all three phases. So lets export that          
+# Option 1: Include phase balancing energy (additional grid import and export at the VRM portal statistics especially at 1 phase systems)           
+#            Reg_f32b(0x0048, '/Ac/Energy/Forward', 1, '%.1f kWh'),
+#            Reg_f32b(0x004a, '/Ac/Energy/Reverse', 1, '%.1f kWh'), 
+#            Reg_f32b(0x0048, '/Ac/L1/Energy/Forward', 1, '%.1f kWh'),  # We dont have separate data for L2 and L3 at this meter
+#            Reg_f32b(0x004a, '/Ac/L1/Energy/Reverse', 1, '%.1f kWh'),  # so we will use L1 only for VRM Portal statistics
+
+# Option 2: Dont show phase balancing energy at VRM portal statistics (statistics may be minimally inaccurate with this option)           
              Reg_f32b(0x018C, '/Ac/Energy/Forward', 1, '%.1f kWh'),     # export minus import
              Reg_f32b(0x018C, '/Ac/Energy/Reverse', -1, '%.1f kWh'),    # export minus import (negative)
-             Reg_f32b(0x018C, '/Ac/L1/Energy/Forward', 3, '%.1f kWh'),  # export minus import
-             Reg_f32b(0x018C, '/Ac/L1/Energy/Reverse', -3, '%.1f kWh'), # export minus import (negative)
-             Reg_f32b(0x018C, '/Ac/L2/Energy/Forward', 3, '%.1f kWh'),  # export minus import
-             Reg_f32b(0x018C, '/Ac/L2/Energy/Reverse', -3, '%.1f kWh'), # export minus import (negative)
-             Reg_f32b(0x018C, '/Ac/L3/Energy/Forward', 3, '%.1f kWh'),  # export minus import
-             Reg_f32b(0x018C, '/Ac/L3/Energy/Reverse', -3, '%.1f kWh'), # export minus import (negative)
+             Reg_f32b(0x018C, '/Ac/L1/Energy/Forward', 1, '%.1f kWh'),  # export minus import
+             Reg_f32b(0x018C, '/Ac/L1/Energy/Reverse', -1, '%.1f kWh'), # export minus import (negative)
         ]
 
         for n in range(1, phases + 1):
             regs += self.phase_regs(n)
 
         self.data_regs = regs
-        # DG
         self.nr_phases = phases
 
     def get_ident(self):
