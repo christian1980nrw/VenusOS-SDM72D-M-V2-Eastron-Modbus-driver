@@ -353,7 +353,7 @@ class BaseDevice:
         latency = []
 
         for r in self.data_regs:
-            t = self.read_data_regs(r, self.dbus)
+            t = self.read_input_data_regs(r, self.dbus)
             if t:
                 latency.append(t)
 
