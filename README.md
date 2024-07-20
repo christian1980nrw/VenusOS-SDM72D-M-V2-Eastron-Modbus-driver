@@ -4,7 +4,7 @@ code for Victron Energy Venus OS v3.20~35 Beta.
 
 This Project will not be developed anymore because there are similar drivers available.
 
-Check out my fork here: https://github.com/christian1980nrw/venus.dbus-modbus-eastron
+So please follow this link and use this driver: https://github.com/christian1980nrw/venus.dbus-modbus-eastron
 
 The default meter password is 1000 if anyone else needs it.
 
